@@ -1,0 +1,319 @@
+#+title: Desktop environment configuration
+#+property: header-args:emacs-lisp :tangle ./desktop.el
+
+* Functions
+
+** Basic EXWM stuff
+
+#+begin_src emacs-lisp
+
+  (defun my/run-in-background (command)
+    (let ((command-parts (split-string command "[ ]+")))
+      (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
+  ;;
+  ;;(defun my/set-wallpaper ()
+  ;;  (interactive)
+  ;; NOTE: You will need to update this to a valid background path!
+  ;;  (start-process-shell-command
+  ;;      "feh" nil  "feh --bg-scale /usr/share/backgrounds/matt-mcnulty-nyc-2nd-ave.jpg"))
+  ;;
+  (defun my/exwm-init-hook ()
+    ;; Make workspace 1 be the one where we land at startup
+    (exwm-workspace-switch-create 1)
+    
+    ;; Open eshell by default
+    (eshell)
+
+    ;; Show battery status in the mode line
+    ;;(display-battery-mode 1)
+
+    ;; Show the time and date in modeline
+    ;;(setq display-time-day-and-date t)
+    ;;(display-time-mode 1)
+    ;; Also take a look at display-time-format and format-time-string
+    
+    ;; Start the polybar panel
+    (my/start-panel)
+      
+    ;; Launch apps that will run in the background
+    (my/run-in-background "nm-applet")
+    (my/run-in-background "pasystray")
+    ;;(my/run-in-background "blueman-applet")
+    )
+
+
+
+  (defun my/exwm-update-class ()
+    (exwm-workspace-rename-buffer exwm-class-name))
+
+  ;;(defun my/exwm-update-title ()
+  ;; (pcase exwm-class-name
+  ;;    ("firefox" (exwm-workspace-rename-buffer (format "Ff: %s" exwm-title)))))
+
+  (defun my/exwm-update-title ()
+    (pcase exwm-class-name
+      ("firefox" (exwm-workspace-rename-buffer (format "Ff: %s" exwm-title)))
+      ("Evince" (exwm-workspace-rename-buffer (format "E: %s" exwm-title)))))
+
+
+  (defun my/configure-window-by-class ()
+    (interactive)
+    (pcase exwm-class-name
+      ("firefox" (exwm-workspace-move-window 2))
+      ;;("Inkscape" (exwm-layout-set-fullscreen))
+      ))
+
+
+#+end_src
+
+** My custom functions
+
+
+#+begin_src emacs-lisp
+  
+  (defun my/open-new-firefox-frame ()
+    "Open a new Firefox frame."
+    (interactive)
+    (start-process-shell-command "firefox" nil "firefox --new-window"))
+
+  (defun my/toggle-fullscreen ()
+    "Toggle between single and multiple window layouts."
+    (interactive)
+    (if (= 1 (length (window-list)))
+        (jump-to-register '_)
+      (window-configuration-to-register '_)
+      (delete-other-windows)))
+
+  (defun my/switch-to-last-buffer ()
+    "Switch to the last buffer."
+    (interactive)
+    (switch-to-buffer (other-buffer (current-buffer) 1)))
+
+  (defun my/session-management ()
+    "Prompt for a session management action and execute it."
+    (interactive)
+    (let ((action (read-key-sequence
+                   "Choose action: [s]uspend, [l]ockscreen, [p]oweroff, [r]eboot, [L]ogout, [a]bort")))
+      (pcase (key-description action)
+        ("s" (start-process-shell-command "systemctl" nil "systemctl suspend"))
+        ("l" (start-process-shell-command "slock" nil "slock"))
+        ("p" (start-process-shell-command "systemctl" nil "systemctl poweroff"))
+        ("r" (start-process-shell-command "systemctl" nil "systemctl reboot"))
+        ("L" (save-buffers-kill-emacs))
+        ("a" (message "Aborted")))))
+
+  (setq confirm-kill-processes nil)
+
+  (defun my/save-buffers-kill-emacs (&optional arg)
+    "Offer to save each buffer, then kill this Emacs process.
+  With prefix ARG, silently save all file-visiting buffers, then kill.
+  Emacs processes are killed without confirmation.
+  Modified buffers with no associated file will not be saved."
+    (interactive "P")
+    (let ((confirm-kill-emacs nil))
+      (save-some-buffers arg t)
+      (kill-emacs)))
+
+  (setq confirm-kill-emacs 'yes-or-no-p)
+
+#+end_src
+
+** LaTex
+
+#+begin_src emacs-lisp
+
+#+end_src
+
+** Open pdf
+
+
+** Firefox
+
+#+begin_src emacs-lisp
+
+  ;; Function to open a new Firefox window with a Google search
+  (defun my/google-search (query)
+    "Open a new Firefox window with a Google search for QUERY."
+    (interactive "sGoogle search: ")
+    (start-process-shell-command
+     "firefox" nil (format "firefox --new-window 'https://www.google.com/search?q=%s'" query)))
+
+ 
+    (use-package exwm-firefox-evil
+      :straight t)
+
+    (dolist (k '(
+    	     escape))
+      (cl-pushnew k exwm-input-prefix-keys))
+#+end_src
+
+
+* EXWM
+
++ To control the screen brightness you need the xbacklight binary (that works with my AMD cpu). In archlinux the package is acpilight and then you need to make a sudo exception of the xbacklight command in the sudoers file
+
++ Volume control uses amixer
+  
+
+#+begin_src emacs-lisp
+  (use-package exwm
+    :config
+
+
+    ;; Set the default number of workspaces
+    (setq exwm-workspace-number 5)
+
+    ;; When window "class" updates, use it to set the buffer name
+    (add-hook 'exwm-update-class-hook #'my/exwm-update-class)
+
+    ;; When window title updates, use it to set the buffer name
+    (add-hook 'exwm-update-title-hook #'my/exwm-update-title)
+
+    ;; Configure windows as they're created
+    (add-hook 'exwm-manage-finish-hook #'my/configure-window-by-class)
+
+    ;; When EXWM starts up, do some extra confifuration
+    (add-hook 'exwm-init-hook #'my/exwm-init-hook)
+
+
+    ;; NOTE: Uncomment the following two options if you want window buffers
+    ;;       to be available on all workspaces!
+
+    ;; Automatically move EXWM buffer to current workspace when selected
+    ;; (setq exwm-layout-show-all-buffers t)
+
+    ;; Display all EXWM buffers in every workspace buffer list
+    ;; (setq exwm-workspace-show-all-buffers t)
+
+    ;; NOTE: Uncomment this option if you want to detach the minibuffer!
+    ;; Detach the minibuffer (show it with exwm-workspace-toggle-minibuffer)
+    ;(setq exwm-workspace-minibuffer-position 'top)
+
+    
+    ;; Rebind CapsLock to Ctrl
+    (start-process-shell-command "xmodmap" nil "xmodmap ~/.emacs.d/exwm/Xmodmap")
+
+    ;;Set the screen resolution, run arandr to get the xrandr command
+    ;(require 'exwm-randr)
+    ;(exwm-randr-enable)
+    ;(start-process-shell-command "xrandr" nil "")
+
+    ;(require 'exwm-systemtray)
+    ;(exwm-systemtray-enable)
+    
+    ;; These keys should always pass through to Emacs
+    (setq exwm-input-prefix-keys
+      '(?\C-x
+        ?\C-u
+        ?\C-h
+        ?\M-x
+        ?\M-`
+        ?\M-&
+        ?\M-:
+        ?\C-\M-j  ;; Buffer list
+        ?\C-\ ))  ;; Ctrl+Space
+
+    ;; Ctrl+Q will enable the next key to be sent directly
+    (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
+
+    ;; Set up global key bindings.  These always work, no matter the input state!
+    ;; Keep in mind that changing this list after EXWM initializes has no effect.
+    (setq exwm-input-global-keys
+          `(
+            ;; Reset to line-mode (C-c C-k switches to char-mode via exwm-input-release-keyboard)
+            ([?\s-r] . exwm-reset)
+
+            ;; Launch applications via shell command
+            ([?\s-&] . (lambda (command)
+                         (interactive (list (read-shell-command "$ ")))
+                         (start-process-shell-command command nil command)))
+
+            ;; Switch workspace
+            ;;([?\s-w] . exwm-workspace-switch)
+  	  ([?\s-`] . (lambda () (interactive) (exwm-workspace-switch-create 0)))
+
+            ;; 's-N': Switch to certain workspace with Super (Win) plus a number key (0 - 9)
+            ,@(mapcar (lambda (i)
+                        `(,(kbd (format "s-%d" i)) .
+                          (lambda ()
+                            (interactive)
+                            (exwm-workspace-switch-create ,i))))
+                      (number-sequence 0 9))
+  	  
+            ;; Evil window navigation
+            ([?\s-h] . windmove-left)
+            ([?\s-j] . windmove-down)
+            ([?\s-k] . windmove-up)
+            ([?\s-l] . windmove-right)
+
+  	   ;; Window management
+            ([?\s-s ?s] . split-window-right)
+            ([?\s-s ?w] . split-window-below)
+            ([?\s-s ?d] . delete-window)
+  	  
+  	  ;; Might not be useful if using hjkl to navigate windows
+            ;;([?\s-o] . other-window)
+
+            ;; I dont know how to write super-tab in the []s
+            ;;([?\s-<tab>] . evil-switch-to-last-window-buffer)
+  	  
+            ;; Show Helm buffer list
+            ([?\s-b] . helm-mini)
+  	  
+            ;; Find files with Helm
+            ([?\s-f] . helm-find-files)
+
+            ;; Toggle fullscreen
+            ([?\s-o] . my/toggle-fullscreen)
+
+            ;; Get prompt for lock,suspend,turnoff,restart,logout
+            ([?\s-u] . my/session-management)
+
+  	  ;; Open a new Firefox frame
+            ([?\s-t ?t] . my/open-new-firefox-frame)
+
+  	  ;; Google search
+            ([?\s-t ?g] . my/google-search)
+
+  	  ;; For exporting inkscape figure
+  	  ([?\s-c ?f] . my/finish-figure)
+
+
+  ;; Volume control
+  ([XF86AudioRaiseVolume] . ,(lambda ()
+                               (interactive)
+                               (start-process-shell-command "amixer" nil "amixer set Master 5%+ unmute")
+                               (let ((volume (string-trim (shell-command-to-string "amixer get Master | grep 'Right:' | awk -F'[][]' '{ print $2 }'"))))
+                                 (message "Volume: %s" volume))))
+  ([XF86AudioLowerVolume] . ,(lambda ()
+                               (interactive)
+                               (start-process-shell-command "amixer" nil "amixer set Master 5%- unmute")
+                               (let ((volume (string-trim (shell-command-to-string "amixer get Master | grep 'Right:' | awk -F'[][]' '{ print $2 }'"))))
+                                 (message "Volume: %s" volume))))
+  ([XF86AudioMute] . ,(lambda ()
+                        (interactive)
+                        (start-process-shell-command "amixer" nil "amixer set Master toggle")))
+
+  ;; Brightness control
+  ;; For the xbacklight binary (that works with my AMD cpu) in archlinux download the acpilight package and then you need to make an sudo exception of the xbacklight command in the sudoers file
+  ([XF86MonBrightnessUp] . ,(lambda ()
+                              (interactive)
+                              (start-process-shell-command "xbacklight" nil "sudo xbacklight -inc 10")
+                              (let ((brightness (string-trim (shell-command-to-string "xbacklight -get"))))
+                                (message "Brightness: %s%%" brightness))))
+  ([XF86MonBrightnessDown] . ,(lambda ()
+                                (interactive)
+                                (start-process-shell-command "xbacklight" nil "sudo xbacklight -dec 10")
+                                (let ((brightness (string-trim (shell-command-to-string "xbacklight -get"))))
+                                  (message "Brightness: %s%%" brightness))))
+
+
+
+  	  ))
+
+    (exwm-enable))
+
+#+end_src
+
+
+

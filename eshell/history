@@ -1,0 +1,128 @@
+slock
+pacman -Ss scrot
+pacman -Ss xbacklight
+sudo pacman -Rns scrot
+pacman -Ss brightnessctl
+sudo pacman -Rns brightnessctl
+xbacklight -inc 5
+pacman -Ss xbacklight
+pacman -Ss xorg-apps
+sudo pacman -S xorg-xbacklight
+xbacklight -inc 10
+xbacklight -inc 100
+xbacklight -dec 50
+xbacklight -dec 100
+xbacklight -set 10
+xbacklight -get
+cat /var/log/Xorg.o.log | grep -i backlight
+sudo pacman -Rns xorg-xbacklight
+sudo pacman -S acpilight
+xbacklight -get
+xbacklight -set 20
+sudo xbacklight -set 20
+ls /user/bin/xbacklight
+ls /user/bin
+sudo ls /user/bin
+ls /usr/bin
+sudo visudo
+vi
+export EDITOR=emacs
+sudo visudo
+sudo EDITOR=emacs visudoa
+sudo EDITOR=emacs visudo
+sudo EDITOR=vim visudo
+xbacklight -set 50
+xbacklight -set 50
+sudo xbacklight -set 50
+sudo xbacklight -set 50
+sudo xbacklight -set 50
+sudo pacman -Ss
+sudo xbacklight -set 50
+sudo pacman -Ss
+sudo xbacklight -set 30
+Library for passing menus over DBus (GTK+ 3 library)
+amixer -q sset Master 5%+
+amixer -q sset Master 5%+
+amixer -q sset Master toggle
+amixer -q sset Master 5%+
+amixer -q sset Master 5%-
+amixer -q sset Master 50%-
+amixer -q sset Master 50%+
+yay -Ss youyube
+yay -Ss youtube
+youtube-music-desktop
+youtube-music
+cd .emacs.d/
+ls
+git init
+git add emacs.org init.el desktop.org desktop.el exwm/
+git commit -m "Initial commit of Emacs configuration"
+git remote add origin https://github.com/recore799/coremacs.git
+git push -u origin master
+cat ~/.ssh/id_ed25519.pub 
+create mode 100755 exwm/start-exwm.sh
+ssh -T git@github.com
+Username for 'https://github.com': recore799
+git remote set-url origin git@github.com:recore799/coremacs.git
+git push origin master
+man inkscape
+killall firefox
+killall inkscape
+sudo pacman -S xlib
+sudo pacman -S python-xlib
+(1/1) installing python-xlib    sudo                    [--------------------------] 100%
+sudo pacman -S poppler
+sudo pacman -S pdf2svg
+sudo pacman -Ss xclip
+sudo pacman -S xclip
+sudo pacman -S rofi
+git clone https://github.com/gillescastel/inkscape-shortcut-manager.git
+ls
+cd inkscape-shortcut-manager/
+ls
+python3 main.py
+python3 main.py
+ls
+cd comp-phys/
+ls
+cd hydrogen-atom/
+ls
+jupyter lab
+s
+ls
+ls
+cd ..
+ls
+cd wave-notebook/
+ls
+cd ..
+cd ..
+ls
+cd C-projects/
+ls
+cd
+ls
+ls Documents/
+sudo pacman -S evince
+cd inkscape-shortcut-manager/
+ls
+python3 main.py
+sudo tlp start
+ls
+./toggle_profile.sh
+./toggle_profile.sh gaming
+./toggle_profile.sh
+sudo pacman -Syyu
+sudo pacman -Syu
+sudo tlp-stat -s
+sudo tlps-stat -b
+sudo tlp-stat -b
+sudo pacman -Syu maim xclip
+maim -s
+maim -s ~/Pictures/test1.png
+sudo pacman -S picom
+maim -s ~/Pictures/test2.png
+maim -s ~/uni/didactica/tareas/tarea1/saber-didactico.png
+maim -s ~/uni/didactica/tareas/tarea1/aula.png
+cd Downloads/
+sudo dd if=instantos_beta7.iso of=/dev/sda bs=4M status=progress && sync
