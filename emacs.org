@@ -299,6 +299,7 @@
 #+begin_src emacs-lisp
 
   (setq initial-major-mode 'org-mode)
+  (setq delete-by-moving-to-trash t)
 
   (setq enable-recursive-minibuffers t)
   (minibuffer-depth-indicate-mode 1)
@@ -380,9 +381,6 @@
     ;; necessary in daemon mode
     (setq doom-modeline-icon t)
     
-    ;; Load and apply a theme
-    (load-theme 'doom-solarized-light t)
-
     ;; Set up visual bell effect globally
     (doom-themes-visual-bell-config))
 
@@ -397,6 +395,9 @@
     (doom-modeline-icon t)
     (doom-modeline-height 15)
     (doom-modeline-major-mode-icon t))
+
+  ;; Load and apply a theme
+  (load-theme 'doom-spacegrey t)
 
 
 #+end_src
@@ -815,7 +816,6 @@
     "Prompt for an Org file and open it with the corresponding PDF file and close other buffers from uni/"
     (interactive)
     (let* ((uni-dirs '("~/uni/cuantica/"
-  		     "~/uni/didactica/"
   		     "~/uni/estado-solido/"
                        "~/uni/geometriad/"
   		     "~/uni/instru2/"
